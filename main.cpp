@@ -13,13 +13,13 @@ std::string getNextStandardToken(const std::string& content, size_t& start);
 
 
 int main() {
-    /*
+
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue;
         
     }
-    */
+    
         std::string test = "echo hello world";
         std::string test2 = "ls -la /tmp";
         std::string test3 = "'Dies ist ein Tokentest'";
@@ -41,10 +41,20 @@ while (cursor < content.length()) {
         cursor++; 
         continue;
     } 
-    else if (content[cursor] == '\"') {
+ else if (content[cursor] == '"') {
+    size_t endQuote = content.find('"', cursor + 1);
 
-        
-    } 
+    if (endQuote != std::string::npos) {
+        std::string token = content.substr(cursor + 1, endQuote - (cursor + 1));
+        out += encloseToken(token);
+        cursor = endQuote + 1; // Cursor hinter das schließende " setzen
+    } else {
+        // Fehlerfall: Kein schließendes " gefunden
+        std::string token = content.substr(cursor + 1);
+        out += encloseToken(token);
+        cursor = content.length();
+    }
+}
     else if (content[cursor] == '\'') {
 
     size_t endQuote = content.find('\'', cursor + 1);
