@@ -1,13 +1,12 @@
-//#include <bits/stdc++.h>
 #include <string>
 #include <vector>
 #include <iostream>
 
 
+using namespace std;
 
-std::string tokenize(std::string &content);
-std::string encloseToken(std::string &token);
-std::string getNextStandardToken(const std::string& content, size_t& start);
+std::string tokenize(const std::string &content);
+std::string encloseToken(const std::string &token);
 
 
 
@@ -16,99 +15,101 @@ int main() {
 
     std::string line;
     while (std::getline(std::cin, line)) {
-        if (line.empty()) continue;
-        
-    }
-    
-        std::string test = "echo hello world";
-        std::string test2 = "ls -la /tmp";
-        std::string test3 = "'Dies ist ein Tokentest'";
+        if (line.empty()) {
+            continue;
+        }
 
-        std::cout << tokenize(test) << std::endl;
-        std::cout << tokenize(test2) << std::endl;
-        std::cout << tokenize(test3) << std::endl;
+        std::cout << tokenize(line) << "\n";
+    }
 
 }
 
-std::string tokenize(std::string &content ) {
-   size_t cursor = 0; // Merkt sich, wo wir im String stehen
-   std::string out{};
+std::string tokenize(const std::string &content) {
+    std::vector<std::string> tokens;
+    std::string current{};
+    bool inToken = false; // true, sobald ein Token begonnen hat (auch bei "" oder '')
+    size_t cursor = 0;    // Merkt sich, wo wir im String stehen
 
-// Beispiel-Schleife oder schrittweise Abfrage:
-while (cursor < content.length()) {
+    while (cursor < content.length()) {
+        char c = content[cursor];
 
-    if (content[cursor] == ' ') {
-        cursor++; 
-        continue;
-    } 
- else if (content[cursor] == '"') {
-    size_t endQuote = content.find('"', cursor + 1);
-
-    if (endQuote != std::string::npos) {
-        std::string token = content.substr(cursor + 1, endQuote - (cursor + 1));
-        out += encloseToken(token);
-        cursor = endQuote + 1; // Cursor hinter das schließende " setzen
-    } else {
-        // Fehlerfall: Kein schließendes " gefunden
-        std::string token = content.substr(cursor + 1);
-        out += encloseToken(token);
-        cursor = content.length();
+        if (c == ' ' || c == '\t') {
+            // Whitespace beendet das aktuelle Token
+            if (inToken) {
+                tokens.push_back(current);
+                current.clear();
+                inToken = false;
+            }
+            cursor++;
+        }
+        else if (c == '\\') {
+            // Backslash außerhalb von Quotes: nächstes Zeichen wörtlich übernehmen
+            inToken = true;
+            if (cursor + 1 < content.length()) {
+                current += content[cursor + 1];
+            }
+            cursor += 2;
+        }
+        else if (c == '\'') {
+            // Single Quotes: alles bis zum schließenden ' wörtlich
+            size_t endQuote = content.find('\'', cursor + 1);
+            if (endQuote == std::string::npos) {
+                return "ERR unterminated quote";
+            }
+            inToken = true;
+            current += content.substr(cursor + 1, endQuote - (cursor + 1));
+            cursor = endQuote + 1;
+        }
+        else if (c == '"') {
+            // Double Quotes: \" \\ \$ \` werden escaped, sonst wörtlich
+            inToken = true;
+            cursor++;
+            bool closed = false;
+            while (cursor < content.length()) {
+                char q = content[cursor];
+                if (q == '"') {
+                    closed = true;
+                    cursor++;
+                    break;
+                }
+                if (q == '\\' && cursor + 1 < content.length()) {
+                    char next = content[cursor + 1];
+                    if (next == '"' || next == '\\' || next == '$' || next == '`') {
+                        current += next;
+                        cursor += 2;
+                        continue;
+                    }
+                }
+                current += q;
+                cursor++;
+            }
+            if (!closed) {
+                return "ERR unterminated quote";
+            }
+        }
+        else {
+            inToken = true;
+            current += c;
+            cursor++;
+        }
     }
-}
-    else if (content[cursor] == '\'') {
 
-    size_t endQuote = content.find('\'', cursor + 1);
-
-    if (endQuote != std::string::npos) {
-        std::string token = content.substr(cursor + 1, endQuote - (cursor + 1));
-        
-        out += encloseToken(token);
-
-        cursor = endQuote + 1;
-    } else {
-        std::string token = content.substr(cursor + 1);
-        out += encloseToken(token);
-        cursor = content.length(); // Beendet die äußere Schleife
+    if (inToken) {
+        tokens.push_back(current);
     }
-    } 
-    else {
-        std::string token = getNextStandardToken(content, cursor);
-        out += encloseToken(token);
+
+    std::string out{};
+    for (size_t i = 0; i < tokens.size(); i++) {
+        if (i > 0) {
+            out += " ";
+        }
+        out += encloseToken(tokens[i]);
     }
-}
     return out;
-    
 }
 
 
 
-std::string encloseToken(std::string &token) {
+std::string encloseToken(const std::string &token) {
     return "[" + token + "]";
 }
-
-
-std::string getNextStandardToken(const std::string& content, size_t& start) {
-    while (start < content.length() && content[start] == ' ') {
-        start++;
-    }
-
-    // Falls wir am Ende des Strings angekommen sind
-    if (start >= content.length()) {
-        return "";
-    }
-
-    // 2. Finde das Ende des Tokens (nächstes Leerzeichen oder String-Ende)
-    size_t i = start;
-    while (i < content.length() && content[i] != ' ') {
-        i++;
-    }
-
-    // 3. Schneide genau dieses eine Token aus
-    std::string token = content.substr(start, i - start);
-
-    // 4. Setze den Start-Cursor weiter für den NÄCHSTEN Aufruf
-    start = i;
-
-    return token;
-}
-
