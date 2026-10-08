@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 
 using namespace std;
@@ -19,8 +20,18 @@ int main() {
             continue;
         }
 
-        std::cout << tokenize(line) << "\n";
+        std::string current = tokenize(line);
+        std::cout << current << "\n";    
+        
+
+       size_t firstPipe = current.find('|');
+
+       
+
+
     }
+
+
 
 }
 
