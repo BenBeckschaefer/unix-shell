@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <unistd.h>
 
 
 using namespace std;
@@ -49,6 +50,7 @@ std::string tokenize(const std::string &content) {
     std::string current{};
     bool inToken = false; // true, sobald ein Token begonnen hat (auch bei "" oder '')
     size_t cursor = 0;    // Merkt sich, wo wir im String stehen
+    size_t commandStart = 0; // Index in tokens, an dem das aktuelle Command beginnt
 
     while (cursor < content.length()) {
         char c = content[cursor];
@@ -110,22 +112,42 @@ std::string tokenize(const std::string &content) {
         else {
             inToken = true;
             if(c == '|') {
+                // Token direkt vor dem '|' (z.B. "ls|wc") nicht verlieren
+                if (!current.empty()) {
+                    tokens.push_back(current);
+                    current.clear();
+                }
+                // Kein Token seit Zeilenanfang bzw. letztem '|' => leeres Command ("| sort", "a || b")
+                if (tokens.size() == commandStart) {
+                    return "ERR syntax error: empty command in pipeline";
+                }
+                tokens.push_back("|");
+                commandStart = tokens.size();
+
                 // Erstes Nicht-Whitespace-Zeichen nach dem '|' (npos = nichts mehr da)
                 size_t next = content.find_first_not_of(" \t\n\r\v\f", cursor + 1);
 
-                if (tokens.empty()) {
-                     return "syntax error near unexpected token '|'";
-                } else if (next != std::string::npos && content[next] == '|') {
-                    // "a | | b" oder "a || b": kein Command zwischen zwei Pipes
-                    return "ERR syntax error: empty command in pipeline";
-                } else if (next == std::string::npos) {
+                if (next == std::string::npos) {
+                    // Nur interaktiv nachfragen; bei Datei-Input (Tests) ist es ein Fehler
+                    if (!isatty(STDIN_FILENO)) {
+                        return "ERR syntax error: empty command in pipeline";
+                    }
                     std::string continuation {};
-                    std::cout << "Please provide additional Commands: " << std::endl;
-                    std::getline (std::cin,continuation);
-                    tokens.push_back( tokenize(continuation));
-
+                    std::cerr << "Please provide additional Commands: " << std::flush;
+                    if (!std::getline(std::cin, continuation)) {
+                        return "ERR syntax error: empty command in pipeline";
+                    }
+                    std::string rest = tokenize(continuation);
+                    if (rest.empty()) {
+                        return "ERR syntax error: empty command in pipeline";
+                    }
+                    if (rest.rfind("ERR", 0) == 0) {
+                        return rest;
+                    }
+                    tokens.push_back(rest);
+                    commandStart = tokens.size();
                 }
-                current.clear();
+
                 inToken = false;
             } else {
                 current += c;
