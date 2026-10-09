@@ -14,22 +14,31 @@ std::string encloseToken(const std::string &token);
 
 int main() {
 
+    // std::vector<std::string> tests = {
+    //     "cat access.log | grep 404 | wc -l", // cat access.log | grep 404 | wc -l
+    //     "| grep x",                          // ERR syntax error: empty command in pipeline (leading pipe)
+    //     "cat file |",                        // ERR syntax error: empty command in pipeline (trailing pipe)
+    //     "a | | b",                           // ERR syntax error: empty command in pipeline (leeres Command in der Mitte)
+    //     "a || b",                            // ERR syntax error: empty command in pipeline (laut Test 9 in dieser Lektion)
+    //     "",                                  // keine Ausgabe, kein Fehler (empty input)
+    // };
+    //  for (const std::string &test : tests) {
+    //     std::cout << "\"" << test << "\" -> " << tokenize(test) << std::endl;
+    // }
+
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) {
             continue;
         }
-
-        std::string current = tokenize(line);
-        std::cout << current << "\n";    
+   
+       std::string current = tokenize(line);
+       std::cout << current << "\n";    
         
 
-       size_t firstPipe = current.find('|');
-
-       
 
 
-    }
+   }
 
 
 
@@ -100,7 +109,28 @@ std::string tokenize(const std::string &content) {
         }
         else {
             inToken = true;
-            current += c;
+            if(c == '|') {
+                // Erstes Nicht-Whitespace-Zeichen nach dem '|' (npos = nichts mehr da)
+                size_t next = content.find_first_not_of(" \t\n\r\v\f", cursor + 1);
+
+                if (tokens.empty()) {
+                     return "syntax error near unexpected token '|'";
+                } else if (next != std::string::npos && content[next] == '|') {
+                    // "a | | b" oder "a || b": kein Command zwischen zwei Pipes
+                    return "ERR syntax error: empty command in pipeline";
+                } else if (next == std::string::npos) {
+                    std::string continuation {};
+                    std::cout << "Please provide additional Commands: " << std::endl;
+                    std::getline (std::cin,continuation);
+                    tokens.push_back( tokenize(continuation));
+
+                }
+                current.clear();
+                inToken = false;
+            } else {
+                current += c;
+                
+            }
             cursor++;
         }
     }
@@ -114,7 +144,7 @@ std::string tokenize(const std::string &content) {
         if (i > 0) {
             out += " ";
         }
-        out += encloseToken(tokens[i]);
+        out +=tokens[i];
     }
     return out;
 }
