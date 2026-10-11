@@ -7,7 +7,7 @@
 
 using namespace std;
 
-std::string tokenize(const std::string &content);
+std::vector<std::string> tokenize(const std::string &content);
 std::string encloseToken(const std::string &token);
 
 
@@ -21,9 +21,19 @@ int main() {
         if (line.empty()) {
             continue;
         }
+     std::cout << "argv=[";
+       std::vector<std::string> current = tokenize(line);
+       for (size_t i = 0; i < current.size(); i++) {
+           if (i > 0) {
+               std::cout << " ";
+           }
+           std::cout << '\''<< current[i] << '\''; 
 
-       std::string current = tokenize(line);
-       std::cout << current << "\n";
+           if(i  < current.size() - 1) {
+                std::cout << ",";
+           }
+       }
+       std::cout << "]" <<"\n";
 
 
 
@@ -35,9 +45,9 @@ int main() {
 }
 
 /// Splits a command line into tokens, handling whitespace, backslash escapes,
-/// single/double quotes and pipes. Returns the tokens joined by spaces,
-/// or an "ERR ..." message on a syntax error.
-std::string tokenize(const std::string &content) {
+/// single/double quotes and pipes. Returns the list of tokens, or a single
+/// "ERR ..." entry on a syntax error.
+std::vector<std::string> tokenize(const std::string &content) {
     std::vector<std::string> tokens;
     std::string current{};
     bool inToken = false;
@@ -65,7 +75,7 @@ std::string tokenize(const std::string &content) {
         else if (c == '\'') {
             size_t endQuote = content.find('\'', cursor + 1);
             if (endQuote == std::string::npos) {
-                return "ERR unterminated quote";
+                return {"ERR unterminated quote"};
             }
             inToken = true;
             current += content.substr(cursor + 1, endQuote - (cursor + 1));
@@ -89,54 +99,66 @@ std::string tokenize(const std::string &content) {
                         cursor += 2;
                         continue;
                     }
-                }
+                }   
                 current += q;
                 cursor++;
             }
             if (!closed) {
-                return "ERR unterminated quote";
+                return {"ERR unterminated quote"};
             }
+        }
+        else if (c == '|') {
+            if (inToken) {
+                tokens.push_back(current);
+                current.clear();
+                inToken = false;
+            }
+            if (tokens.size() == commandStart) {
+                return {"ERR syntax error: empty command in pipeline"};
+            }
+            tokens.push_back("|");
+            commandStart = tokens.size();
+
+            size_t next = content.find_first_not_of(" \t\n\r\v\f", cursor + 1);
+
+            if (next == std::string::npos) {
+                if (!isatty(STDIN_FILENO)) {
+                    return {"ERR syntax error: empty command in pipeline"};
+                }
+                std::string continuation{};
+                std::cerr << "Please provide additional Commands: " << std::flush;
+                if (!std::getline(std::cin, continuation)) {
+                    return {"ERR syntax error: empty command in pipeline"};
+                }
+                std::vector<std::string> rest = tokenize(continuation);
+                if (rest.empty()) {
+                    return {"ERR syntax error: empty command in pipeline"};
+                }
+                if (rest[0].rfind("ERR", 0) == 0) {
+                    return rest;
+                }
+                tokens.insert(tokens.end(), rest.begin(), rest.end());
+                commandStart = tokens.size();
+            }
+            cursor++;
+        }else if (c == '>' || c == '<') {
+            char next = current[cursor + 1];
+            if(next == '>') {
+                current += next;
+                cursor++;
+            }
+            tokens.push_back(current);
+            current.clear();
+            inToken = false;
+
+            if (tokens.size() == commandStart) {
+                return {"ERR syntax error: empty command in pipeline"};
+            }
+            commandStart = tokens.size();
         }
         else {
             inToken = true;
-            if(c == '|') {
-                if (!current.empty()) {
-                    tokens.push_back(current);
-                    current.clear();
-                }
-                if (tokens.size() == commandStart) {
-                    return "ERR syntax error: empty command in pipeline";
-                }
-                tokens.push_back("|");
-                commandStart = tokens.size();
-
-                size_t next = content.find_first_not_of(" \t\n\r\v\f", cursor + 1);
-
-                if (next == std::string::npos) {
-                    if (!isatty(STDIN_FILENO)) {
-                        return "ERR syntax error: empty command in pipeline";
-                    }
-                    std::string continuation {};
-                    std::cerr << "Please provide additional Commands: " << std::flush;
-                    if (!std::getline(std::cin, continuation)) {
-                        return "ERR syntax error: empty command in pipeline";
-                    }
-                    std::string rest = tokenize(continuation);
-                    if (rest.empty()) {
-                        return "ERR syntax error: empty command in pipeline";
-                    }
-                    if (rest.rfind("ERR", 0) == 0) {
-                        return rest;
-                    }
-                    tokens.push_back(rest);
-                    commandStart = tokens.size();
-                }
-
-                inToken = false;
-            } else {
-                current += c;
-
-            }
+            current += c;
             cursor++;
         }
     }
@@ -145,14 +167,7 @@ std::string tokenize(const std::string &content) {
         tokens.push_back(current);
     }
 
-    std::string out{};
-    for (size_t i = 0; i < tokens.size(); i++) {
-        if (i > 0) {
-            out += " ";
-        }
-        out +=tokens[i];
-    }
-    return out;
+    return tokens;
 }
 
 
