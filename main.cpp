@@ -13,29 +13,18 @@ std::string encloseToken(const std::string &token);
 
 
 
+/// Reads commands line by line from stdin and prints the tokenized result.
 int main() {
-
-    // std::vector<std::string> tests = {
-    //     "cat access.log | grep 404 | wc -l", // cat access.log | grep 404 | wc -l
-    //     "| grep x",                          // ERR syntax error: empty command in pipeline (leading pipe)
-    //     "cat file |",                        // ERR syntax error: empty command in pipeline (trailing pipe)
-    //     "a | | b",                           // ERR syntax error: empty command in pipeline (leeres Command in der Mitte)
-    //     "a || b",                            // ERR syntax error: empty command in pipeline (laut Test 9 in dieser Lektion)
-    //     "",                                  // keine Ausgabe, kein Fehler (empty input)
-    // };
-    //  for (const std::string &test : tests) {
-    //     std::cout << "\"" << test << "\" -> " << tokenize(test) << std::endl;
-    // }
 
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) {
             continue;
         }
-   
+
        std::string current = tokenize(line);
-       std::cout << current << "\n";    
-        
+       std::cout << current << "\n";
+
 
 
 
@@ -45,18 +34,20 @@ int main() {
 
 }
 
+/// Splits a command line into tokens, handling whitespace, backslash escapes,
+/// single/double quotes and pipes. Returns the tokens joined by spaces,
+/// or an "ERR ..." message on a syntax error.
 std::string tokenize(const std::string &content) {
     std::vector<std::string> tokens;
     std::string current{};
-    bool inToken = false; // true, sobald ein Token begonnen hat (auch bei "" oder '')
-    size_t cursor = 0;    // Merkt sich, wo wir im String stehen
-    size_t commandStart = 0; // Index in tokens, an dem das aktuelle Command beginnt
+    bool inToken = false;
+    size_t cursor = 0;
+    size_t commandStart = 0;
 
     while (cursor < content.length()) {
         char c = content[cursor];
 
         if (c == ' ' || c == '\t') {
-            // Whitespace beendet das aktuelle Token
             if (inToken) {
                 tokens.push_back(current);
                 current.clear();
@@ -65,7 +56,6 @@ std::string tokenize(const std::string &content) {
             cursor++;
         }
         else if (c == '\\') {
-            // Backslash außerhalb von Quotes: nächstes Zeichen wörtlich übernehmen
             inToken = true;
             if (cursor + 1 < content.length()) {
                 current += content[cursor + 1];
@@ -73,7 +63,6 @@ std::string tokenize(const std::string &content) {
             cursor += 2;
         }
         else if (c == '\'') {
-            // Single Quotes: alles bis zum schließenden ' wörtlich
             size_t endQuote = content.find('\'', cursor + 1);
             if (endQuote == std::string::npos) {
                 return "ERR unterminated quote";
@@ -83,7 +72,6 @@ std::string tokenize(const std::string &content) {
             cursor = endQuote + 1;
         }
         else if (c == '"') {
-            // Double Quotes: \" \\ \$ \` werden escaped, sonst wörtlich
             inToken = true;
             cursor++;
             bool closed = false;
@@ -112,23 +100,19 @@ std::string tokenize(const std::string &content) {
         else {
             inToken = true;
             if(c == '|') {
-                // Token direkt vor dem '|' (z.B. "ls|wc") nicht verlieren
                 if (!current.empty()) {
                     tokens.push_back(current);
                     current.clear();
                 }
-                // Kein Token seit Zeilenanfang bzw. letztem '|' => leeres Command ("| sort", "a || b")
                 if (tokens.size() == commandStart) {
                     return "ERR syntax error: empty command in pipeline";
                 }
                 tokens.push_back("|");
                 commandStart = tokens.size();
 
-                // Erstes Nicht-Whitespace-Zeichen nach dem '|' (npos = nichts mehr da)
                 size_t next = content.find_first_not_of(" \t\n\r\v\f", cursor + 1);
 
                 if (next == std::string::npos) {
-                    // Nur interaktiv nachfragen; bei Datei-Input (Tests) ist es ein Fehler
                     if (!isatty(STDIN_FILENO)) {
                         return "ERR syntax error: empty command in pipeline";
                     }
@@ -151,7 +135,7 @@ std::string tokenize(const std::string &content) {
                 inToken = false;
             } else {
                 current += c;
-                
+
             }
             cursor++;
         }
@@ -173,6 +157,7 @@ std::string tokenize(const std::string &content) {
 
 
 
+/// Wraps a token in square brackets, e.g. "ls" -> "[ls]".
 std::string encloseToken(const std::string &token) {
     return "[" + token + "]";
 }
