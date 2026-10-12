@@ -141,20 +141,20 @@ std::vector<std::string> tokenize(const std::string &content) {
                 commandStart = tokens.size();
             }
             cursor++;
-        }else if (c == '>' || c == '<') {
-            char next = current[cursor + 1];
-            if(next == '>') {
-                current += next;
+        }
+        else if (c == '>' || c == '<') {
+            if (inToken) {
+                tokens.push_back(current);
+                current.clear();
+                inToken = false;
+            }
+            if (c == '>' && cursor + 1 < content.length() && content[cursor + 1] == '>') {
+                tokens.push_back(">>");
+                cursor += 2;
+            } else {
+                tokens.push_back(std::string(1, c));
                 cursor++;
             }
-            tokens.push_back(current);
-            current.clear();
-            inToken = false;
-
-            if (tokens.size() == commandStart) {
-                return {"ERR syntax error: empty command in pipeline"};
-            }
-            commandStart = tokens.size();
         }
         else {
             inToken = true;
