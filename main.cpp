@@ -10,11 +10,25 @@ using namespace std;
 std::vector<std::string> tokenize(const std::string &content);
 std::string encloseToken(const std::string &token);
 
+struct Redirect {
+    int fd;
+    std::string op;
+    std::string target;
+
+};
+
+enum fd {
+    
+
+}
 
 
 
 /// Reads commands line by line from stdin and prints the tokenized result.
 int main() {
+
+    std::vector<std::string> argv;
+    std::vector<Redirect> redirs;
 
     std::string line;
     while (std::getline(std::cin, line)) {
@@ -22,20 +36,42 @@ int main() {
             continue;
         }
      std::cout << "argv=[";
-       std::vector<std::string> current = tokenize(line);
-       for (size_t i = 0; i < current.size(); i++) {
+     std::vector<std::string> tokens = tokenize(line);
+       for (size_t i = 0; i < tokens.size(); i++) {
            if (i > 0) {
                std::cout << " ";
            }
-           std::cout << '\''<< current[i] << '\''; 
+           std::cout << '\''<< tokens[i] << '\''; 
 
-           if(i  < current.size() - 1) {
+           if(i  < tokens.size() - 1) {
                 std::cout << ",";
            }
        }
        std::cout << "]" <<"\n";
 
+       for(size_t i {}; i < tokens.size(); i++) {
+            if(tokens[i] == ">>") {
+                Redirect obj;
+                 obj.fd = 1;
+                 obj.op = ">>";
+                 obj.target = tokens[i + 1];
+            } else if (tokens[i] == ">") {
+                 Redirect obj;
+                 obj.fd = 1;
+                 obj.op = ">";
+                 obj.target = tokens[i + 1];
+                 i = 
+            }
+            else if (tokens[i] == "<") {
+                 Redirect obj;
+                 obj.fd = 0;
+                 obj.op = "<";
+                 obj.target = tokens[i + 1];
+            } else{
+                argv.push_back(tokens[i]);
+            } 
 
+       }
 
 
    }
