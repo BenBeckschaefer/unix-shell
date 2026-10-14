@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 #include <unistd.h>
 
 
@@ -14,70 +15,64 @@ struct Redirect {
     int fd;
     std::string op;
     std::string target;
-
 };
 
-enum fd {
-    
-
+/// Recognises redirect operators such as ">", ">>", "<", "2>" or "1>>".
+/// Returns true and fills fd/op if the token is one.
+static bool parseRedirectOp(const std::string &token, int &fd, std::string &op) {
+    size_t digits = 0;
+    while (digits < token.size() && isdigit(static_cast<unsigned char>(token[digits]))) {
+        digits++;
+    }
+    op = token.substr(digits);
+    if (op != ">" && op != ">>" && op != "<") {
+        return false;
+    }
+    if (digits > 0) {
+        fd = std::stoi(token.substr(0, digits));
+    } else {
+        fd = (op == "<") ? 0 : 1;
+    }
+    return true;
 }
 
-
-
-/// Reads commands line by line from stdin and prints the tokenized result.
+/// Reads commands line by line from stdin and prints argv and redirects.
 int main() {
-
-    std::vector<std::string> argv;
-    std::vector<Redirect> redirs;
-
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) {
             continue;
         }
-     std::cout << "argv=[";
-     std::vector<std::string> tokens = tokenize(line);
-       for (size_t i = 0; i < tokens.size(); i++) {
-           if (i > 0) {
-               std::cout << " ";
-           }
-           std::cout << '\''<< tokens[i] << '\''; 
 
-           if(i  < tokens.size() - 1) {
-                std::cout << ",";
-           }
-       }
-       std::cout << "]" <<"\n";
+        std::vector<std::string> tokens = tokenize(line);
+        std::vector<std::string> argv;
+        std::vector<Redirect> redirs;
 
-       for(size_t i {}; i < tokens.size(); i++) {
-            if(tokens[i] == ">>") {
-                Redirect obj;
-                 obj.fd = 1;
-                 obj.op = ">>";
-                 obj.target = tokens[i + 1];
-            } else if (tokens[i] == ">") {
-                 Redirect obj;
-                 obj.fd = 1;
-                 obj.op = ">";
-                 obj.target = tokens[i + 1];
-                 i = 
-            }
-            else if (tokens[i] == "<") {
-                 Redirect obj;
-                 obj.fd = 0;
-                 obj.op = "<";
-                 obj.target = tokens[i + 1];
-            } else{
+        for (size_t i = 0; i < tokens.size(); i++) {
+            Redirect r;
+            if (parseRedirectOp(tokens[i], r.fd, r.op) && i + 1 < tokens.size()) {
+                r.target = tokens[i + 1];
+                redirs.push_back(r);
+                i++;
+            } else {
                 argv.push_back(tokens[i]);
-            } 
+            }
+        }
 
-       }
+        std::cout << "argv=[";
+        for (size_t i = 0; i < argv.size(); i++) {
+            if (i > 0) {
+                std::cout << ", ";
+            }
+            std::cout << '\'' << argv[i] << '\'';
+        }
+        std::cout << "]\n";
 
-
-   }
-
-
-
+        for (const Redirect &r : redirs) {
+            std::cout << "redir fd=" << r.fd << " op=" << r.op
+                      << " target=" << r.target << "\n";
+        }
+    }
 }
 
 /// Splits a command line into tokens, handling whitespace, backslash escapes,
@@ -179,6 +174,15 @@ std::vector<std::string> tokenize(const std::string &content) {
             cursor++;
         }
         else if (c == '>' || c == '<') {
+            bool fdPrefix = c == '>' && inToken && current.size() == 1 && isdigit(static_cast<unsigned char>(current[0]));
+            if (fdPrefix) {
+                bool append = cursor + 1 < content.length() && content[cursor + 1] == '>';
+                tokens.push_back(current + (append ? ">>" : ">"));
+                current.clear();
+                inToken = false;
+                cursor += append ? 2 : 1;
+                continue;
+            }
             if (inToken) {
                 tokens.push_back(current);
                 current.clear();
