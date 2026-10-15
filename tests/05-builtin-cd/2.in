@@ -1,1 +1,5 @@
+cd /tmp
+cd -
+pwd
+cd -
 pwd

@@ -1,1 +1,10 @@
-(no foreground job)
+ok
+ok
+SIGUSR1=IGN SIGTERM=HANDLER
+caught
+ignored
+101
+SIGUSR1=IGN SIGTERM=HANDLER
+ok
+SIGUSR1=IGN
+running

@@ -1,2 +1,1 @@
-SET X hi
-EXPAND $(upper $X)
+EXPAND [$(printf 'one\ntwo\n')]

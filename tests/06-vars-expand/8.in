@@ -1,3 +1,1 @@
-SET A x
-UNSET A
-EXPAND [$A]
+EXPAND price: $5 and 100$ and $-

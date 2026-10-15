@@ -1,1 +1,2 @@
-EXPAND $UNSET
+SET WORD abcdef
+EXPAND len=${#WORD} ${#NOPE}

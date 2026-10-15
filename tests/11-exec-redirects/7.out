@@ -1,3 +1,2 @@
-OPEN b WRONLY|CREAT|APPEND -> fd 100
-DUP2 100 1
-CLOSE 100
+$ cat < missing.txt
+ERR missing.txt: No such file or directory

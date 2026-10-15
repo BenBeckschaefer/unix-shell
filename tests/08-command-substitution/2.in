@@ -1,1 +1,3 @@
 EXPAND $(echo hi)
+EXPAND $(upper world)
+EXPAND $(len abcdef)

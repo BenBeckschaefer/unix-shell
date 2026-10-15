@@ -1,1 +1,1 @@
-< in.txt
+cmd 2>&1 > out.txt

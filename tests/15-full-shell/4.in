@@ -1,3 +1,14 @@
-
-set NAME=bob
-echo $NAME
+FILE main.py
+FILE build.py
+FILE README.md
+FILE notes.md
+FILE .gitignore
+FILE data.txt
+FILE src/app.c
+FILE src/util.c
+FILE src/util.h
+cd src
+ls *.c
+cd ..
+ls src/*.[ch]
+pwd

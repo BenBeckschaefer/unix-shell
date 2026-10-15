@@ -1,1 +1,8 @@
-shell exiting
+101
+102
+ok
+100 terminated
+101 terminated
+terminated SIGINT status=130
+terminated SIGINT status=130
+running

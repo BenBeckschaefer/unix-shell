@@ -1,2 +1,4 @@
-[1] 1001
-[1]+ Done x
+[1] 5001
+bash: bg: job 1 already in background
+bash: bg: job 1 already in background
+sleep 1

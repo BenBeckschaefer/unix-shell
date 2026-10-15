@@ -1,2 +1,4 @@
-BG x
-EXIT x
+BG sleep 1
+BG %1
+BG %%
+FG %1

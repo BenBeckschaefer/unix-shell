@@ -1,1 +1,3 @@
-hello
+hello ALICE
+name has 5 chars
+nested=FOO

@@ -1,1 +1,1 @@
-ls -la /tmp
+cat<in.txt>out.txt

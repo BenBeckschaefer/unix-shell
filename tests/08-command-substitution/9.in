@@ -1,3 +1,0 @@
-SET A 1
-SET B 2
-EXPAND $A+$B=$(echo 3)

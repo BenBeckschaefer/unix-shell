@@ -1,2 +1,2 @@
-SET WORD abcdef
-EXPAND len=${#WORD}
+SET F foo
+EXPAND ${F:+set}/${G:+set}/${F:-no}

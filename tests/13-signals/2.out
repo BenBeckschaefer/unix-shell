@@ -1,1 +1,11 @@
-state=prompt fg=0
+ok
+ok
+101
+ok
+ok
+ok
+ok
+ok
+101 terminated
+terminated SIGINT status=130
+running

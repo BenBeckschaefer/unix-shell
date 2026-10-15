@@ -1,1 +1,3 @@
-BG x
+BG sleep 100
+BG make all
+JOBS

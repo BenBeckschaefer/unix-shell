@@ -1,2 +1,1 @@
-SET X foo
-EXPAND $(echo $(upper $X))
+EXPAND $(echo -n a)$(echo -n b)

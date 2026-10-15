@@ -1,0 +1,5 @@
+FILE a.txt
+FILE *.txt
+FILE b.txt
+MATCH *.txt
+MATCH \*.txt

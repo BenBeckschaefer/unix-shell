@@ -1,5 +1,5 @@
 CMD cat <<EOF
-BODY:
-hello
-world
+HEREDOC EOF expand=yes strip=no
+|hello
+|world
 END

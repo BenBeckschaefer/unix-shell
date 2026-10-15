@@ -1,3 +1,7 @@
-OPEN c RDONLY -> fd 100
-DUP2 100 0
-CLOSE 100
+$ prog 2>/dev/null
+OPEN /dev/null WRONLY|CREAT|TRUNC -> 3
+DUP2 3 2
+CLOSE 3
+FD 0=tty 1=tty 2=/dev/null
+$ prog arg
+FD 0=tty 1=tty 2=tty

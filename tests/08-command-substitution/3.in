@@ -1,1 +1,2 @@
-EXPAND $(upper world)
+SET X hello
+EXPAND $X $(echo $X) ${X}!

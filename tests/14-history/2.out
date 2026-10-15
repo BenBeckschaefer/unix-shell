@@ -1,1 +1,3 @@
-RAN ls
+RAN cp a.txt b.txt
+RAN ls -l b.txt
+RAN echo -l b.txt end

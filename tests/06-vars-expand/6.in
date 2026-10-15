@@ -1,2 +1,2 @@
-SET FOO bar
-EXPAND ${FOO:-x}
+SET EMPTY
+EXPAND [${EMPTY:-dflt}] [${EMPTY:+alt}] [${EMPTY}]

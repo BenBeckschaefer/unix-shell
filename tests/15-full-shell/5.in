@@ -1,4 +1,5 @@
-
-cd /tmp
+echo hi | cat
+cd /tmp | cat
 pwd
-echo $PWD
+echo hi > f
+pwd

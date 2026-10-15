@@ -1,2 +1,12 @@
-
-echo hello > out.txt
+FILE main.py
+FILE build.py
+FILE README.md
+FILE notes.md
+FILE .gitignore
+FILE data.txt
+FILE src/app.c
+FILE src/util.c
+FILE src/util.h
+cat < data.txt | sort > sorted.txt
+cat < missing.txt
+wc -l *.md > count.txt 2> /dev/null

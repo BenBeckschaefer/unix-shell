@@ -1,2 +1,6 @@
-RAN: OK1 FAIL5 OK2
-EXIT: 0
++ false
++ echo c
+c
++ echo d
+d
+status 0

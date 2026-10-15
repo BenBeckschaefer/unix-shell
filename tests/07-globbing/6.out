@@ -1,1 +1,4 @@
-apple banana
+.config
+.config/settings.json
+*/settings.json
+.git

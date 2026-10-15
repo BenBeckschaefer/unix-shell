@@ -1,1 +1,4 @@
--1
+101
+ok
+zombie ppid=100 prog=shell exit=44
+reaped 101 exit=44 $?=44

@@ -1,2 +1,5 @@
-0
--1
+101
+running ppid=100 prog=shell
+ok
+running ppid=100 prog=grep
+running ppid=1 prog=shell

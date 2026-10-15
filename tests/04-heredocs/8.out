@@ -1,0 +1,4 @@
+CMD cat <<END
+HEREDOC END expand=yes strip=no
+|  END
+END

@@ -1,2 +1,6 @@
-RAN: FAIL1
-EXIT: 1
++ false
++ echo recovered
+recovered
+status 0
++ true
+status 0

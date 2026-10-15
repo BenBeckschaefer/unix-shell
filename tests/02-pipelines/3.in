@@ -1,1 +1,1 @@
-ls | grep .py | sort | head -3
+ps aux | grep nginx | awk '{print $2}' | sort -n | head -3

@@ -1,1 +1,4 @@
-hello
+RUN 1/1 [cmd] in=- out=file:out.txt err=-
+RUN 1/1 [cmd] in=- out=file:out.txt err=file:out.txt
+RUN 1/2 [cmd] in=- out=pipe err=pipe
+RUN 2/2 [grep] [x] in=pipe out=- err=-

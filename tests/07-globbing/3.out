@@ -1,1 +1,1 @@
-*.md
+Makefile README.md build.py data.txt main.py notes_v1.txt notes_v10.txt src

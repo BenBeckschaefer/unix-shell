@@ -1,1 +1,7 @@
-a | b
+PIPELINE 6
+1: [cat] [access.log]
+2: [cut] [-d ] [-f1]
+3: [sort]
+4: [uniq] [-c]
+5: [sort] [-rn]
+6: [head]

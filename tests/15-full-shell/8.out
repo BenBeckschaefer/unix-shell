@@ -1,1 +1,4 @@
-hello
+RUN 1/2 [cat] in=file:data.txt out=pipe err=-
+RUN 2/2 [sort] in=pipe out=file:sorted.txt err=-
+ERR missing.txt: No such file or directory
+RUN 1/1 [wc] [-l] [README.md] [notes.md] in=- out=file:count.txt err=file:/dev/null

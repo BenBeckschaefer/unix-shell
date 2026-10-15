@@ -1,1 +1,1 @@
-echo 'a$VAR  b'
+grep -E '^(foo|bar)$' src/main.c

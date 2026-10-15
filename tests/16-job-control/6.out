@@ -1,2 +1,8 @@
-[1] 1001
-[1]+  Running                 x
+[1] 5001
+[2] 5002
+[3] 5003
+a
+[1]+  Stopped                 a
+[1]+  Stopped                 a
+[2]   Running                 b &
+[3]-  Running                 c &

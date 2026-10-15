@@ -1,2 +1,6 @@
-BG x
+BG a
+BG b
+BG c
+FG %1
+TSTP
 JOBS

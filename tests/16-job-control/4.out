@@ -1,3 +1,4 @@
-[1] 1001
-ed
-[1]+ Stopped ed
+[1] 5001
+[1]+  Done                    sleep 5 &
+[1] 5002
+[1]+  Exit 1                  false &

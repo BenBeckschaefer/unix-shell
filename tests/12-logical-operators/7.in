@@ -1,1 +1,1 @@
-OK1 && FAIL5 || OK2
+false && echo a && echo b || echo c && echo d

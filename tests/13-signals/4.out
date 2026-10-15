@@ -1,5 +1,7 @@
-started 1
-forwarded SIGINT to 1
-forwarded SIGINT to 1
-done 1
-state=prompt fg=0
+ERR cannot change SIGKILL
+ERR cannot change SIGSTOP
+stopped
+stopped
+continued
+terminated
+terminated SIGKILL status=137

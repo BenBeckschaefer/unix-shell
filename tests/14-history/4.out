@@ -1,4 +1,2 @@
-RAN a
-RAN b
-RAN c
-RAN a
+RAN apt update
+RAN sudo apt update

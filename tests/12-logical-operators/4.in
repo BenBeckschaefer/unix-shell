@@ -1,1 +1,2 @@
-FAIL2 && OK1
+status 3 && echo no
+status 3 || echo handled

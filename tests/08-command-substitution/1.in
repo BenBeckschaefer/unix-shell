@@ -1,1 +1,4 @@
-EXPAND hello
+SET NAME alice
+EXPAND hello $(upper $NAME)
+EXPAND name has $(len $NAME) chars
+EXPAND nested=$(echo $(upper foo))

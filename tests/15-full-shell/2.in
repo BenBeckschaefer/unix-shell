@@ -1,2 +1,2 @@
-
-pwd
+X="a b"
+cmd $X "$X" '$X' \$X

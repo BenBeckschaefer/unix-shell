@@ -1,1 +1,2 @@
-foo "unterminated
+echo 2>err.log
+echo 2 > err.log

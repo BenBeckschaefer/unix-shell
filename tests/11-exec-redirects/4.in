@@ -1,1 +1,2 @@
->> log.txt
+FILE in.txt
+sort < in.txt > out.txt

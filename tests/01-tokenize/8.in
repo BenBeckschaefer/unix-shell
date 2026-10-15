@@ -1,1 +1,1 @@
-cmd "arg with \"escaped\" quote"
+echo "" ''

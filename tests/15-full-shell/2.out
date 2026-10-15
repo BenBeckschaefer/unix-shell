@@ -1,1 +1,1 @@
-/home/user
+RUN 1/1 [cmd] [a] [b] [a b] [$X] [$X] in=- out=- err=-

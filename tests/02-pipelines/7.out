@@ -1,1 +1,3 @@
-a | b | c | d
+PIPELINE 2
+1: [sort] (<) [in.txt]
+2: [uniq] (>) [out.txt]

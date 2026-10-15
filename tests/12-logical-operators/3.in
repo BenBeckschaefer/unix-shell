@@ -1,1 +1,1 @@
-OK1 && OK2
+echo a; echo b; echo c

@@ -1,3 +1,9 @@
-started 100
-done 100
-state=prompt fg=0
+101
+102
+ok
+ok
+102 terminated
+running
+running
+terminated SIGINT status=130
+no foreground process

@@ -1,1 +1,4 @@
-!5
+echo base
+echo 'keep !!'
+echo "pre !-2 post"
+echo hi\!!

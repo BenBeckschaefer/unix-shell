@@ -1,1 +1,4 @@
-7
+101
+ok
+zombie ppid=100 prog=shell signal=9
+reaped 101 signal=9 $?=137

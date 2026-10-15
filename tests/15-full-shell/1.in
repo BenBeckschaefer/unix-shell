@@ -1,9 +1,14 @@
 FILE main.py
 FILE build.py
 FILE README.md
-
-set NAME=alice
+FILE notes.md
+FILE .gitignore
+FILE data.txt
+FILE src/app.c
+FILE src/util.c
+FILE src/util.h
+NAME=alice
 echo $NAME
+ls *.py | grep py > out.txt
 cd /tmp
 pwd
-ls *.py | grep py > out.txt

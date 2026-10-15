@@ -1,2 +1,6 @@
-RAN: FAIL2
-EXIT: 2
++ status 3
+status 3
++ status 3
++ echo handled
+handled
+status 0

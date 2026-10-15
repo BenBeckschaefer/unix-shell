@@ -1,2 +1,2 @@
-argv=['ls', '-la']
+argv: [ls] [-la]
 redir fd=1 op=> target=out.txt

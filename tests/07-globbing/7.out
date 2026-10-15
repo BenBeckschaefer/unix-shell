@@ -1,1 +1,3 @@
-one.log
+*.xml
+src/*.rs
+nodir/*

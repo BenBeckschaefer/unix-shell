@@ -1,1 +1,3 @@
-bob
+RUN 1/1 [ls] [app.c] [util.c] in=- out=- err=-
+RUN 1/1 [ls] [src/app.c] [src/util.c] [src/util.h] in=- out=- err=-
+/home/user

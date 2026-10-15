@@ -1,4 +1,7 @@
-running prog=shell
-zombie prog=ls
-0
-reaped prog=ls
+101
+ok
+running ppid=100 prog=ls
+ok
+zombie ppid=100 prog=ls exit=0
+reaped 101 exit=0 $?=0
+gone

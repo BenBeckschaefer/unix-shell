@@ -1,1 +1,1 @@
-a | b
+cat access.log | cut -d' ' -f1 | sort | uniq -c | sort -rn | head

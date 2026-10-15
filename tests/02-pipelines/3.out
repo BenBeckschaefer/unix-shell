@@ -1,1 +1,6 @@
-ls | grep .py | sort | head -3
+PIPELINE 5
+1: [ps] [aux]
+2: [grep] [nginx]
+3: [awk] [{print $2}]
+4: [sort] [-n]
+5: [head] [-3]

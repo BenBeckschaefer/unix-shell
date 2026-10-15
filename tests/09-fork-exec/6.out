@@ -1,1 +1,4 @@
-unknown prog=?
+unknown
+ERR no such process
+ERR no such process
+running ppid=1 prog=shell

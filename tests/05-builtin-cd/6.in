@@ -1,6 +1,3 @@
-cd /one
-cd /two
-cd -
-pwd
-cd -
-pwd
+cd ~
+cd ~/docs
+echo $?

@@ -1,1 +1,6 @@
-cd -
+DIR /srv/app/logs
+cd /srv/app/logs
+cd ../..
+pwd
+cd ./app/../app
+pwd

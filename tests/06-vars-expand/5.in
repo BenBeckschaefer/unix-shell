@@ -1,1 +1,2 @@
-EXPAND ${MISSING:-fallback}
+SET X hi
+EXPAND '$X' "$X" \$X

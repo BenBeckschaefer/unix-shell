@@ -1,1 +1,1 @@
-a | b | c | d
+sort < in.txt | uniq > out.txt

@@ -1,1 +1,3 @@
-CMD 0 ls
+CHILD 1 ls
+  EXEC ls
+PARENT WAIT 1

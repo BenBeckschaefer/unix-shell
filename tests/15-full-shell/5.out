@@ -1,1 +1,7 @@
-/tmp
+RUN 1/2 [echo] [hi] in=- out=pipe err=-
+RUN 2/2 [cat] in=pipe out=- err=-
+RUN 1/2 [cd] [/tmp] in=- out=pipe err=-
+RUN 2/2 [cat] in=pipe out=- err=-
+/home/user
+RUN 1/1 [echo] [hi] in=- out=file:f err=-
+/home/user

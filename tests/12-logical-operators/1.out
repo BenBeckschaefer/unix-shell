@@ -1,2 +1,8 @@
-RAN: OK1
-EXIT: 0
++ true
++ echo yes
+yes
+status 0
++ false
++ echo no
+no
+status 0

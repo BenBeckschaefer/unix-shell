@@ -1,4 +1,6 @@
-FILE one.py
-FILE two.py
-
-ls *.py
+ls |
+| wc
+echo "x
+ls > > x
+cd /nope
+echo $?

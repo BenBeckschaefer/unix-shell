@@ -1,3 +1,5 @@
-RAN ls
-RAN echo hi
-RAN echo hi
+RAN echo one
+RAN echo two
+RAN echo three
+RAN echo two
+RAN echo two

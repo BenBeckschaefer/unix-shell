@@ -1,2 +1,3 @@
-
-echo hello
+cmd 2>&1 > out.txt
+cmd > out.txt 2>&1
+cmd 2>&1 | grep x

@@ -1,6 +1,2 @@
-cd /a/b/c
-pwd
-cd ..
-pwd
-cd ../..
-pwd
+cd -
+echo $?

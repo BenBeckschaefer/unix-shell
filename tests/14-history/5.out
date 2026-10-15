@@ -1,2 +1,3 @@
-RAN ls -l
-RAN ls -l
+RAN echo foo bar
+RAN echo baz bar
+RAN echo baz qux

@@ -1,3 +1,8 @@
-OPEN log.txt WRONLY|CREAT|APPEND -> fd 100
-DUP2 100 1
-CLOSE 100
+$ sort < in.txt > out.txt
+OPEN in.txt RDONLY -> 3
+DUP2 3 0
+CLOSE 3
+OPEN out.txt WRONLY|CREAT|TRUNC -> 3
+DUP2 3 1
+CLOSE 3
+FD 0=in.txt 1=out.txt 2=tty

@@ -1,1 +1,5 @@
-(no foreground job)
+bash: fg: %3: no such job
+bash: bg: current: no such job
+bash: fg: current: no such job
+bash: bg: %9: no such job
+bash: bg: %2: no such job

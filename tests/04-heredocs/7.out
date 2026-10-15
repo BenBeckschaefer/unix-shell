@@ -1,7 +1,3 @@
-CMD cat <<END
-BODY:
-single
-END
-CMD ls
-BODY:
+CMD cat <<X
+HEREDOC X expand=yes strip=no
 END

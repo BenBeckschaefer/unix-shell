@@ -1,2 +1,1 @@
-SET X hello
-EXPAND $X
+EXPAND a$(printf 'x\n\n\n')b

@@ -1,1 +1,1 @@
-[echo] [a b c]
+[make] (&&) [make] [test] (||) [echo] [failed] (;) [echo] [done]

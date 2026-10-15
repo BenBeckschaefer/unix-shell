@@ -1,0 +1,8 @@
+---
+Checks: '*,readability-identifier-naming,-fuchsia-*,-google-*'
+CheckOptions:
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.ClassCase
+    value: PascalCase
+---

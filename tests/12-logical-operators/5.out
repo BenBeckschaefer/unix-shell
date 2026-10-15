@@ -1,2 +1,5 @@
-RAN: FAIL3 OK1
-EXIT: 0
++ mkdir build
+mkdir: command not found
++ echo failed
+failed
+status 0

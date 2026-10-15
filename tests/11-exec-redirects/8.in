@@ -1,1 +1,2 @@
-< c
+prog 2>/dev/null
+prog arg

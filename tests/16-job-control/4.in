@@ -1,2 +1,5 @@
-FG ed
-TSTP
+BG sleep 5
+DONE %1
+JOBS
+BG false
+DONE %1 1

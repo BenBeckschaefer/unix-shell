@@ -1,2 +1,4 @@
-RAN: OK1 OK2 OK3 OK4
-EXIT: 0
++ true
++ echo b
+b
+status 0

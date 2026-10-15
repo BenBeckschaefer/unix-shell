@@ -3,6 +3,7 @@ ls -la
 !!
 !1
 !ls
-:hist
+history
 !99
 echo done
+history

@@ -1,1 +1,1 @@
-EXPAND $(len abcdef)
+EXPAND $(unknown args)x

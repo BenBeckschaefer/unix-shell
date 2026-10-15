@@ -1,0 +1,3 @@
+CHILD 1 ls -la /tmp
+  EXEC ls
+PARENT WAIT 1

@@ -1,1 +1,2 @@
-ERR unterminated quote
+[echo] {2} (>) [err.log]
+[echo] [2] (>) [err.log]

@@ -1,2 +1,3 @@
-ls -l
-!ls
+echo foo bar
+^foo^baz
+^bar^qux^

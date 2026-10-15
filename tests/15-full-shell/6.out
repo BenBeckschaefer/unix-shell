@@ -1,1 +1,6 @@
-OK [ls, one.py, two.py] stdout=- pipe=false
+ERR syntax error: empty command in pipeline
+ERR syntax error: empty command in pipeline
+ERR unterminated quote
+ERR syntax error near unexpected token '>'
+cd: /nope: No such file or directory
+1

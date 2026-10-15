@@ -1,3 +1,5 @@
-ls
-echo hi
-!!
+echo one
+echo two
+echo three
+!-2
+!-1

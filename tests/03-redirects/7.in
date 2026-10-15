@@ -1,1 +1,1 @@
-sort < data.txt >> sorted.txt
+sort <data.txt >>sorted.txt

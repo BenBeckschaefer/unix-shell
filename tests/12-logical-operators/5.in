@@ -1,1 +1,1 @@
-FAIL3 || OK1
+mkdir build && cd build && make || echo failed

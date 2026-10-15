@@ -1,4 +1,7 @@
-first
-second
-third
-:hist
+!!
+!5
+!nosuch
+!$
+ls
+!-3
+!$

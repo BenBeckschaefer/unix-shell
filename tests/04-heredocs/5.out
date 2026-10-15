@@ -1,9 +1,5 @@
-CMD a
-BODY:
+CMD cat <<EOF | tr a-z A-Z
+HEREDOC EOF expand=yes strip=no
+|shout
 END
-CMD b
-BODY:
-END
-CMD c
-BODY:
-END
+CMD wc -l

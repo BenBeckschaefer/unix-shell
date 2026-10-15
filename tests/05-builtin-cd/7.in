@@ -1,2 +1,2 @@
-cd /foo/./bar/../baz
+exit 3
 pwd
