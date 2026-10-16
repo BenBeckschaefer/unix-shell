@@ -52,6 +52,11 @@ int main() {
             Redirect r;
             if (parseRedirectOp(tokens[i], r.fd, r.op) && i + 1 < tokens.size()) {
                 r.target = tokens[i + 1];
+                // fd duplication: ">" followed by "&N" becomes op ">&" with target "N"
+                if (r.op == ">" && r.target.size() > 1 && r.target[0] == '&') {
+                    r.op = ">&";
+                    r.target = r.target.substr(1);
+                }
                 redirs.push_back(r);
                 i++;
             } else {
@@ -61,9 +66,12 @@ int main() {
 
         std::cout << "argv: ";
         for (size_t i = 0; i < argv.size(); i++) {
-            std::cout << "[" << argv[i] << "] "; 
+            if (i > 0) {
+                std::cout << " ";
+            }
+            std::cout << encloseToken(argv[i]);
         }
-        std::cout << std::endl;
+        std::cout << "\n";
 
         for (const Redirect &r : redirs) {
             std::cout << "redir fd=" << r.fd << " op=" << r.op
