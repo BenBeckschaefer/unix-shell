@@ -8,7 +8,14 @@
 
 using namespace std;
 
-std::vector<std::string> tokenize(const std::string &content);
+/// A lexed word. isOperator is true only for unquoted shell operators
+/// (|, <, >, >>, 2>, ...), so a quoted ">>" stays a plain word.
+struct Token {
+    std::string text;
+    bool isOperator = false;
+};
+
+std::vector<Token> tokenize(const std::string &content);
 std::string encloseToken(const std::string &token);
 
 struct Redirect {
@@ -44,14 +51,14 @@ int main() {
             continue;
         }
 
-        std::vector<std::string> tokens = tokenize(line);
+        std::vector<Token> tokens = tokenize(line);
         std::vector<std::string> argv;
         std::vector<Redirect> redirs;
 
         for (size_t i = 0; i < tokens.size(); i++) {
             Redirect r;
-            if (parseRedirectOp(tokens[i], r.fd, r.op) && i + 1 < tokens.size()) {
-                r.target = tokens[i + 1];
+            if (tokens[i].isOperator && parseRedirectOp(tokens[i].text, r.fd, r.op) && i + 1 < tokens.size()) {
+                r.target = tokens[i + 1].text;
                 // fd duplication: ">" followed by "&N" becomes op ">&" with target "N"
                 if (r.op == ">" && r.target.size() > 1 && r.target[0] == '&') {
                     r.op = ">&";
@@ -60,7 +67,7 @@ int main() {
                 redirs.push_back(r);
                 i++;
             } else {
-                argv.push_back(tokens[i]);
+                argv.push_back(tokens[i].text);
             }
         }
 
@@ -83,8 +90,8 @@ int main() {
 /// Splits a command line into tokens, handling whitespace, backslash escapes,
 /// single/double quotes and pipes. Returns the list of tokens, or a single
 /// "ERR ..." entry on a syntax error.
-std::vector<std::string> tokenize(const std::string &content) {
-    std::vector<std::string> tokens;
+std::vector<Token> tokenize(const std::string &content) {
+    std::vector<Token> tokens;
     std::string current{};
     bool inToken = false;
     size_t cursor = 0;
@@ -95,7 +102,7 @@ std::vector<std::string> tokenize(const std::string &content) {
 
         if (c == ' ' || c == '\t') {
             if (inToken) {
-                tokens.push_back(current);
+                tokens.push_back(Token{current});
                 current.clear();
                 inToken = false;
             }
@@ -111,7 +118,7 @@ std::vector<std::string> tokenize(const std::string &content) {
         else if (c == '\'') {
             size_t endQuote = content.find('\'', cursor + 1);
             if (endQuote == std::string::npos) {
-                return {"ERR unterminated quote"};
+                return {Token{"ERR unterminated quote"}};
             }
             inToken = true;
             current += content.substr(cursor + 1, endQuote - (cursor + 1));
@@ -140,37 +147,37 @@ std::vector<std::string> tokenize(const std::string &content) {
                 cursor++;
             }
             if (!closed) {
-                return {"ERR unterminated quote"};
+                return {Token{"ERR unterminated quote"}};
             }
         }
         else if (c == '|') {
             if (inToken) {
-                tokens.push_back(current);
+                tokens.push_back(Token{current});
                 current.clear();
                 inToken = false;
             }
             if (tokens.size() == commandStart) {
-                return {"ERR syntax error: empty command in pipeline"};
+                return {Token{"ERR syntax error: empty command in pipeline"}};
             }
-            tokens.push_back("|");
+            tokens.push_back(Token{"|", true});
             commandStart = tokens.size();
 
             size_t next = content.find_first_not_of(" \t\n\r\v\f", cursor + 1);
 
             if (next == std::string::npos) {
                 if (!isatty(STDIN_FILENO)) {
-                    return {"ERR syntax error: empty command in pipeline"};
+                    return {Token{"ERR syntax error: empty command in pipeline"}};
                 }
                 std::string continuation{};
                 std::cerr << "Please provide additional Commands: " << std::flush;
                 if (!std::getline(std::cin, continuation)) {
-                    return {"ERR syntax error: empty command in pipeline"};
+                    return {Token{"ERR syntax error: empty command in pipeline"}};
                 }
-                std::vector<std::string> rest = tokenize(continuation);
+                std::vector<Token> rest = tokenize(continuation);
                 if (rest.empty()) {
-                    return {"ERR syntax error: empty command in pipeline"};
+                    return {Token{"ERR syntax error: empty command in pipeline"}};
                 }
-                if (rest[0].rfind("ERR", 0) == 0) {
+                if (rest[0].text.rfind("ERR", 0) == 0) {
                     return rest;
                 }
                 tokens.insert(tokens.end(), rest.begin(), rest.end());
@@ -182,22 +189,22 @@ std::vector<std::string> tokenize(const std::string &content) {
             bool fdPrefix = c == '>' && inToken && current.size() == 1 && isdigit(static_cast<unsigned char>(current[0]));
             if (fdPrefix) {
                 bool append = cursor + 1 < content.length() && content[cursor + 1] == '>';
-                tokens.push_back(current + (append ? ">>" : ">"));
+                tokens.push_back(Token{current + (append ? ">>" : ">"), true});
                 current.clear();
                 inToken = false;
                 cursor += append ? 2 : 1;
                 continue;
             }
             if (inToken) {
-                tokens.push_back(current);
+                tokens.push_back(Token{current});
                 current.clear();
                 inToken = false;
             }
             if (c == '>' && cursor + 1 < content.length() && content[cursor + 1] == '>') {
-                tokens.push_back(">>");
+                tokens.push_back(Token{">>", true});
                 cursor += 2;
             } else {
-                tokens.push_back(std::string(1, c));
+                tokens.push_back(Token{std::string(1, c), true});
                 cursor++;
             }
         }
@@ -209,7 +216,7 @@ std::vector<std::string> tokenize(const std::string &content) {
     }
 
     if (inToken) {
-        tokens.push_back(current);
+        tokens.push_back(Token{current});
     }
 
     return tokens;
