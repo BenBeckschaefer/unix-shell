@@ -59,14 +59,11 @@ int main() {
             }
         }
 
-        std::cout << "argv=[";
+        std::cout << "argv: ";
         for (size_t i = 0; i < argv.size(); i++) {
-            if (i > 0) {
-                std::cout << ", ";
-            }
-            std::cout << '\'' << argv[i] << '\'';
+            std::cout << "[" << argv[i] << "] "; 
         }
-        std::cout << "]\n";
+        std::cout << std::endl;
 
         for (const Redirect &r : redirs) {
             std::cout << "redir fd=" << r.fd << " op=" << r.op
