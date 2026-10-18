@@ -55,6 +55,11 @@ int main() {
         std::vector<std::string> argv;
         std::vector<Redirect> redirs;
 
+        if (tokens.size() == 1 && !tokens[0].isOperator && tokens[0].text.rfind("ERR", 0) == 0) {
+            std::cout << tokens[0].text << "\n";
+            continue;
+        }
+
         std::string syntaxError;
         for (size_t i = 0; i < tokens.size(); i++) {
             Redirect r;
@@ -71,6 +76,10 @@ int main() {
                 r.target = tokens[i + 1].text;
                 redirs.push_back(r);
                 i++;
+            } else if (tokens[i].isOperator) {
+                // pipes, ';' etc. are not supported yet
+                syntaxError = tokens[i].text;
+                break;
             } else {
                 argv.push_back(tokens[i].text);
             }
@@ -193,6 +202,15 @@ std::vector<Token> tokenize(const std::string &content) {
                 tokens.insert(tokens.end(), rest.begin(), rest.end());
                 commandStart = tokens.size();
             }
+            cursor++;
+        }
+        else if (c == ';') {
+            if (inToken) {
+                tokens.push_back(Token{current});
+                current.clear();
+                inToken = false;
+            }
+            tokens.push_back(Token{";", true});
             cursor++;
         }
         else if (c == '>' || c == '<') {
