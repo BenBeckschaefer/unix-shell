@@ -32,13 +32,13 @@ static bool parseRedirectOp(const std::string &token, int &fd, std::string &op) 
         digits++;
     }
     op = token.substr(digits);
-    if (op != ">" && op != ">>" && op != "<") {
+    if (op != ">" && op != ">>" && op != "<" && op != ">&" && op != "<&" && op != "<<" && op != "<<-") {
         return false;
     }
     if (digits > 0) {
         fd = std::stoi(token.substr(0, digits));
     } else {
-        fd = (op == "<") ? 0 : 1;
+        fd = (op[0] == '<') ? 0 : 1;
     }
     return true;
 }
@@ -69,11 +69,6 @@ int main() {
                     break;
                 }
                 r.target = tokens[i + 1].text;
-                // fd duplication: ">" followed by "&N" becomes op ">&" with target "N"
-                if (r.op == ">" && r.target.size() > 1 && r.target[0] == '&') {
-                    r.op = ">&";
-                    r.target = r.target.substr(1);
-                }
                 redirs.push_back(r);
                 i++;
             } else {
@@ -201,27 +196,28 @@ std::vector<Token> tokenize(const std::string &content) {
             cursor++;
         }
         else if (c == '>' || c == '<') {
-            bool fdPrefix = c == '>' && inToken && current.size() == 1 && isdigit(static_cast<unsigned char>(current[0]));
-            if (fdPrefix) {
-                bool append = cursor + 1 < content.length() && content[cursor + 1] == '>';
-                tokens.push_back(Token{current + (append ? ">>" : ">"), true});
+            // an all-digit word directly before the operator is the fd ("3<&0")
+            std::string prefix;
+            if (inToken && !current.empty() &&
+                std::all_of(current.begin(), current.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); })) {
+                prefix = current;
                 current.clear();
                 inToken = false;
-                cursor += append ? 2 : 1;
-                continue;
-            }
-            if (inToken) {
+            } else if (inToken) {
                 tokens.push_back(Token{current});
                 current.clear();
                 inToken = false;
             }
-            if (c == '>' && cursor + 1 < content.length() && content[cursor + 1] == '>') {
-                tokens.push_back(Token{">>", true});
-                cursor += 2;
-            } else {
-                tokens.push_back(Token{std::string(1, c), true});
-                cursor++;
+            static const char *ops[] = {"<<-", ">>", ">&", "<<", "<&", ">", "<"};
+            std::string op;
+            for (const char *candidate : ops) {
+                if (content.compare(cursor, std::string(candidate).size(), candidate) == 0) {
+                    op = candidate;
+                    break;
+                }
             }
+            tokens.push_back(Token{prefix + op, true});
+            cursor += op.size();
         }
         else {
             inToken = true;
