@@ -55,9 +55,19 @@ int main() {
         std::vector<std::string> argv;
         std::vector<Redirect> redirs;
 
+        std::string syntaxError;
         for (size_t i = 0; i < tokens.size(); i++) {
             Redirect r;
-            if (tokens[i].isOperator && parseRedirectOp(tokens[i].text, r.fd, r.op) && i + 1 < tokens.size()) {
+            if (tokens[i].isOperator && parseRedirectOp(tokens[i].text, r.fd, r.op)) {
+                // a redirect needs a plain word as target
+                if (i + 1 >= tokens.size()) {
+                    syntaxError = "newline";
+                    break;
+                }
+                if (tokens[i + 1].isOperator) {
+                    syntaxError = tokens[i + 1].text;
+                    break;
+                }
                 r.target = tokens[i + 1].text;
                 // fd duplication: ">" followed by "&N" becomes op ">&" with target "N"
                 if (r.op == ">" && r.target.size() > 1 && r.target[0] == '&') {
@@ -69,6 +79,11 @@ int main() {
             } else {
                 argv.push_back(tokens[i].text);
             }
+        }
+
+        if (!syntaxError.empty()) {
+            std::cout << "ERR syntax error near unexpected token '" << syntaxError << "'\n";
+            continue;
         }
 
         std::cout << "argv: ";
