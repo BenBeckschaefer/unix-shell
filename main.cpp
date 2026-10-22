@@ -17,11 +17,18 @@ struct Token {
 
 std::vector<Token> tokenize(const std::string &content);
 std::string encloseToken(const std::string &token);
+bool handleChangeDirectory (const std::string &directory);
 
 struct Redirect {
     int fd;
     std::string op;
     std::string target;
+};
+
+struct State {
+    std::string PWD;  
+    std::stringOLDPWD ;
+    exit_status = 0
 };
 
 /// Recognises redirect operators such as ">", ">>", "<", "2>" or "1>>".
@@ -134,7 +141,13 @@ int main() {
             continue;
         }
 
-        std::string syntaxError;
+
+       auto it = find(tokens.begin(), tokens.end(), "cd");
+        if(it != tokens.end()) {
+                //handle chnage directory
+
+        } 
+
         std::vector<Heredoc> heredocs = findHeredocs(line, syntaxError);
         if (!syntaxError.empty()) {
             std::cout << "ERR syntax error near unexpected token '" << syntaxError << "'\n";
@@ -320,4 +333,9 @@ std::vector<Token> tokenize(const std::string &content) {
 /// Wraps a token in square brackets, e.g. "ls" -> "[ls]".
 std::string encloseToken(const std::string &token) {
     return "[" + token + "]";
+}
+
+bool handleChangeDirectory (const std::string &directory) {
+    
+                
 }
