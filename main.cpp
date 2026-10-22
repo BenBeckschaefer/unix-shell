@@ -52,7 +52,7 @@ struct Heredoc {
 
 /// Finds every unquoted "<<" / "<<-" on a command line and records the
 /// delimiter word (quotes removed). A quoted delimiter turns expand off.
-static std::vector<Heredoc> findHeredocs(const std::string &line) {
+static std::vector<Heredoc> findHeredocs(const std::string &line, std::string &syntaxError) {
     std::vector<Heredoc> found;
     size_t i = 0;
     while (i < line.size()) {
@@ -77,6 +77,14 @@ static std::vector<Heredoc> findHeredocs(const std::string &line) {
             }
             while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) {
                 i++;
+            }
+            if (i >= line.size()) {
+                syntaxError = "newline";
+                return found;
+            }
+            if (std::string("|;<>&()").find(line[i]) != std::string::npos) {
+                syntaxError = line.substr(i, (line[i] == '>' || line[i] == '<') && line.compare(i, 2, std::string(2, line[i])) == 0 ? 2 : 1);
+                return found;
             }
             // read the delimiter word, dropping quotes and remembering them
             while (i < line.size() && !isspace(static_cast<unsigned char>(line[i])) &&
@@ -120,7 +128,18 @@ int main() {
 
         std::cout << "CMD " << line << "\n";
 
-        std::vector<Heredoc> heredocs = findHeredocs(line);
+        std::vector<Token> tokens = tokenize(line);
+        if (tokens.size() == 1 && !tokens[0].isOperator && tokens[0].text == "ERR unterminated quote") {
+            std::cout << tokens[0].text << "\n";
+            continue;
+        }
+
+        std::string syntaxError;
+        std::vector<Heredoc> heredocs = findHeredocs(line, syntaxError);
+        if (!syntaxError.empty()) {
+            std::cout << "ERR syntax error near unexpected token '" << syntaxError << "'\n";
+            continue;
+        }
         for (Heredoc &h : heredocs) {
             bool terminated = false;
             std::string bodyLine;
@@ -143,7 +162,7 @@ int main() {
                 std::cout << "|" << b << "\n";
             }
             if (!terminated) {
-                std::cout << "ERR unterminated heredoc '" << h.delimiter << "'\n";
+                std::cout << "UNTERMINATED " << h.delimiter << "\n";
                 return 0;
             }
             std::cout << "END\n";
