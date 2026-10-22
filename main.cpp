@@ -43,7 +43,74 @@ static bool parseRedirectOp(const std::string &token, int &fd, std::string &op) 
     return true;
 }
 
-/// Reads commands line by line from stdin and prints argv and redirects.
+struct Heredoc {
+    std::string delimiter;
+    bool expand = true;
+    bool stripTabs = false;
+    std::vector<std::string> body;
+};
+
+/// Finds every unquoted "<<" / "<<-" on a command line and records the
+/// delimiter word (quotes removed). A quoted delimiter turns expand off.
+static std::vector<Heredoc> findHeredocs(const std::string &line) {
+    std::vector<Heredoc> found;
+    size_t i = 0;
+    while (i < line.size()) {
+        char c = line[i];
+        if (c == '\\') {
+            i += 2;
+        } else if (c == '\'') {
+            size_t end = line.find('\'', i + 1);
+            i = (end == std::string::npos) ? line.size() : end + 1;
+        } else if (c == '"') {
+            i++;
+            while (i < line.size() && line[i] != '"') {
+                i += (line[i] == '\\') ? 2 : 1;
+            }
+            i++;
+        } else if (c == '<' && line.compare(i, 2, "<<") == 0) {
+            Heredoc h;
+            i += 2;
+            if (i < line.size() && line[i] == '-') {
+                h.stripTabs = true;
+                i++;
+            }
+            while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) {
+                i++;
+            }
+            // read the delimiter word, dropping quotes and remembering them
+            while (i < line.size() && !isspace(static_cast<unsigned char>(line[i])) &&
+                   line[i] != '|' && line[i] != ';' && line[i] != '<' && line[i] != '>') {
+                char d = line[i];
+                if (d == '\\') {
+                    h.expand = false;
+                    if (i + 1 < line.size()) {
+                        h.delimiter += line[i + 1];
+                    }
+                    i += 2;
+                } else if (d == '\'' || d == '"') {
+                    h.expand = false;
+                    size_t end = line.find(d, i + 1);
+                    if (end == std::string::npos) {
+                        end = line.size();
+                    }
+                    h.delimiter += line.substr(i + 1, end - i - 1);
+                    i = end + 1;
+                } else {
+                    h.delimiter += d;
+                    i++;
+                }
+            }
+            found.push_back(h);
+        } else {
+            i++;
+        }
+    }
+    return found;
+}
+
+/// Reads script lines from stdin. For each command line prints the line and,
+/// for every here-document on it, the delimiter, flags and body.
 int main() {
     std::string line;
     while (std::getline(std::cin, line)) {
@@ -51,57 +118,35 @@ int main() {
             continue;
         }
 
-        std::vector<Token> tokens = tokenize(line);
-        std::vector<std::string> argv;
-        std::vector<Redirect> redirs;
+        std::cout << "CMD " << line << "\n";
 
-        if (tokens.size() == 1 && !tokens[0].isOperator && tokens[0].text.rfind("ERR", 0) == 0) {
-            std::cout << tokens[0].text << "\n";
-            continue;
-        }
-
-        std::string syntaxError;
-        for (size_t i = 0; i < tokens.size(); i++) {
-            Redirect r;
-            if (tokens[i].isOperator && parseRedirectOp(tokens[i].text, r.fd, r.op)) {
-                // a redirect needs a plain word as target
-                if (i + 1 >= tokens.size()) {
-                    syntaxError = "newline";
+        std::vector<Heredoc> heredocs = findHeredocs(line);
+        for (Heredoc &h : heredocs) {
+            bool terminated = false;
+            std::string bodyLine;
+            while (std::getline(std::cin, bodyLine)) {
+                if (h.stripTabs) {
+                    size_t firstNonTab = bodyLine.find_first_not_of('\t');
+                    bodyLine = (firstNonTab == std::string::npos) ? "" : bodyLine.substr(firstNonTab);
+                }
+                if (bodyLine == h.delimiter) {
+                    terminated = true;
                     break;
                 }
-                if (tokens[i + 1].isOperator) {
-                    syntaxError = tokens[i + 1].text;
-                    break;
-                }
-                r.target = tokens[i + 1].text;
-                redirs.push_back(r);
-                i++;
-            } else if (tokens[i].isOperator) {
-                // pipes, ';' etc. are not supported yet
-                syntaxError = tokens[i].text;
-                break;
-            } else {
-                argv.push_back(tokens[i].text);
+                h.body.push_back(bodyLine);
             }
-        }
 
-        if (!syntaxError.empty()) {
-            std::cout << "ERR syntax error near unexpected token '" << syntaxError << "'\n";
-            continue;
-        }
-
-        std::cout << "argv: ";
-        for (size_t i = 0; i < argv.size(); i++) {
-            if (i > 0) {
-                std::cout << " ";
+            std::cout << "HEREDOC " << h.delimiter
+                      << " expand=" << (h.expand ? "yes" : "no")
+                      << " strip=" << (h.stripTabs ? "yes" : "no") << "\n";
+            for (const std::string &b : h.body) {
+                std::cout << "|" << b << "\n";
             }
-            std::cout << encloseToken(argv[i]);
-        }
-        std::cout << "\n";
-
-        for (const Redirect &r : redirs) {
-            std::cout << "redir fd=" << r.fd << " op=" << r.op
-                      << " target=" << r.target << "\n";
+            if (!terminated) {
+                std::cout << "ERR unterminated heredoc '" << h.delimiter << "'\n";
+                return 0;
+            }
+            std::cout << "END\n";
         }
     }
 }
