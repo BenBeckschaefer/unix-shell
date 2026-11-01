@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cctype>
 #include <unistd.h>
+#include <filesystem>
+#include <unistd.h>
 
 
 using namespace std;
@@ -26,9 +28,9 @@ struct Redirect {
 };
 
 struct State {
-    std::string PWD;  
-    std::stringOLDPWD ;
-    exit_status = 0
+    std::string PWD {};  
+    std::string OLDPWD {};
+    size_t exit_status = 0;
 };
 
 /// Recognises redirect operators such as ">", ">>", "<", "2>" or "1>>".
@@ -144,7 +146,7 @@ int main() {
 
        auto it = find(tokens.begin(), tokens.end(), "cd");
         if(it != tokens.end()) {
-                //handle chnage directory
+                //handle chnage d
 
         } 
 
@@ -336,6 +338,34 @@ std::string encloseToken(const std::string &token) {
 }
 
 bool handleChangeDirectory (const std::string &directory) {
-    
+    bool result{}; 
+try {
+     result = filesystem::is_directory(directory);
+} catch (const filesystem::filesystem_error& e) {
+
+       std::cout << "what():  " << e.what() << '\n'
+                  << "path1(): " << e.path1() << '\n'
+                  << "path2(): " << e.path2() << '\n'
+                  << "code().value():    " << e.code().value() << '\n'
+                  << "code().message():  " << e.code().message() << '\n'
+                  << "code().category(): " << e.code().category().name() << '\n';
+}
+
+if(result) {
+
+        int ret;
+
+        ret = chdir (directory.c_str());
+
+        return ret;
+ 
+
+} else {
+
+    return false;
+}
+
+
+
                 
 }
