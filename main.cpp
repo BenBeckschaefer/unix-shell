@@ -129,6 +129,11 @@ static std::vector<Heredoc> findHeredocs(const std::string &line, std::string &s
 /// Reads script lines from stdin. For each command line prints the line and,
 /// for every here-document on it, the delimiter, flags and body.
 int main() {
+//initialize state
+State state;
+state.PWD = std::filesystem::current_path().string();
+
+
     std::string line;
     while (std::getline(std::cin, line)) {
         if (line.empty()) {
